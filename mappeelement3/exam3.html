@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam </title>
+    <link href="exam3.css" rel="stylesheet" media="all">
+</head>
+<body>
+    <main>
+        <h1>Fargepaletten</h1>
+        <canvas id="colorspace"></canvas>
+        <nav>
+            <button id="addColor">Legg till en farge</button>
+            <button id="emptyArray">Tilbakestill fargene</button>
+            <button id="generateAll">Generer 10 nye farger</button>
+        </nav>
+        <h2>Endre farger:</h2>
+        <section>
+            <p>Bytt ut fargen i rute <select id="colorSquareIndex">
+                <option value="0">1</option>
+                <option value="1">2</option>
+                <option value="2">3</option>
+                <option value="3">4</option>
+                <option value="4">5</option>
+                <option value="5">6</option>
+                <option value="6">7</option>
+                <option value="7">8</option>
+                <option value="8">9</option>
+                <option value="9">10</option>
+            </select> med #<input type="text" id="newColor" /> <button id="saveNewColor">Lagre ny farge</button></p>
+        </section>
+    </main>
+    
+
+    <script>
+        // Configure canvas
+        const canvas = document.getElementById("colorspace");
+        canvas.width = 1000; // Setter bredden på canvas
+        canvas.height = 150; // Setter høyden for å gi plass til hvite bokser
+        const ctx = canvas.getContext("2d"); // Henter 2D-konteksten for tegning
+
+        // Oppretter et array for å lagre de genererte fargene
+        let farger = [];
+
+        // Variabel for å kontrollere om firkanter skal tegnes
+        let skalTegnes = true;
+
+        // Funksjon for å generere en tilfeldig hex-farge
+        function genererTilfeldigFarge() {
+            const bokstaver = '0123456789ABCDEF'; // Gyldige tegn for hex-farger
+            let farge = '#'; // Alle hex-farger starter med #
+            for (let i = 0; i < 6; i++) { // En hex-farge har 6 tegn etter #
+                farge += bokstaver[Math.floor(Math.random() * 16)]; // Velger et tilfeldig tegn fra 'bokstaver'
+            }
+            return farge; // Returnerer den genererte fargen
+        }
+
+        // Funksjon for å oppdatere canvas basert på fargene i arrayet
+        function oppdaterCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Tømmer canvas før vi tegner
+
+            if (!skalTegnes) {
+                // Hvis firkanter ikke skal tegnes, avslutt funksjonen her
+                return;
+            }
+
+            const firkantBredde = canvas.width / 10; // Bredden for hver firkant
+            const firkantHøyde = 100; // Høyden for hver firkant
+
+            farger.forEach((farge, indeks) => {
+                // Tegner selve fargefirkanten
+                ctx.fillStyle = farge; // Setter bakgrunnsfargen
+                ctx.fillRect(indeks * firkantBredde, 25, firkantBredde, firkantHøyde); // Tegner firkanten fra y = 25
+
+                // Tegner hvitt rektangel for fargekoden oppe i høyre hjørne
+                ctx.fillStyle = "#FFFFFF"; // Hvit bakgrunn for tekst
+                ctx.fillRect((indeks + 1) * firkantBredde - 100, 15, 70, 35); // Hvitt rektangel oppe i høyre hjørne
+
+                // Legger til fargekode-tekst i det hvite rektangelet
+                ctx.fillStyle = "#000000"; // Sort tekst
+                ctx.font = "13px Arial";
+                ctx.textAlign = "center"; // Sentraliserer teksten
+                ctx.fillText(farge, (indeks + 1) * firkantBredde - 65, 40); // Plasserer teksten i midten av det hvite rektangelet
+
+                // Tegner liten hvit boks for nummeret lengre til høyre og høyere opp
+                ctx.fillStyle = "#FFFFFF"; // Hvit bakgrunn for nummer
+                ctx.fillRect((indeks + 1) * firkantBredde - 20, firkantHøyde + 5, 30, 20); // Lite rektangel til høyre og høyere
+
+                // Legger til nummer-tekst i den lille boksen
+                ctx.fillStyle = "#000000"; // Sort tekst for nummeret
+                ctx.font = "12px Arial";
+                ctx.textAlign = "center"; // Sentraliserer nummeret
+                ctx.fillText(indeks + 1, (indeks + 1) * firkantBredde - 10, firkantHøyde + 20); // Plasserer teksten i midten av boksen
+            });
+        }
+
+        // Funksjon som kjøres når brukeren klikker på "Legg til en farge"-knappen
+        function leggTilFarge() {
+            if (farger.length < 10) { // Maksimalt 10 farger
+                const nyFarge = genererTilfeldigFarge(); // Generer en ny tilfeldig farge
+                farger.push(nyFarge); // Legger til den nye fargen i arrayet
+                skalTegnes = true; // Tillater tegning
+                oppdaterCanvas(); // Tegner opp fargene på canvas
+                console.log(farger); // Logger farge-arrayet til konsollen
+            } else {
+                alert("Du kan ikke legge til flere enn 10 farger!"); // Hvis arrayet har nådd maks størrelse
+            }
+        }
+
+        // Funksjon for å tilbakestille fargene
+        function tilbakestillFarger() {
+        // Tømmer både canvas og farger-arrayet
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Tømmer canvas
+        farger = []; // Tømmer arrayet med lagrede farger
+
+        // Logger tomt array for å indikere at farger er fjernet
+        console.log("Alle farger fjernet. Nåværende array:", farger);
+        }
+
+        
+
+        // Legger til event listeners for knappene
+        document.getElementById("addColor").addEventListener("click", leggTilFarge);
+        document.getElementById("emptyArray").addEventListener("click", tilbakestillFarger);
+
+        // Funksjon for kontinuerlig oppdatering (hvis ønsket)
+        function renderCanvas() {
+            oppdaterCanvas(); // Tegner opp canvas på nytt
+            requestAnimationFrame(renderCanvas); // Sørger for kontinuerlig oppdatering
+        }
+
+        // Start kontinuerlig oppdatering
+        renderCanvas();
+
+        
+    </script>
+    
+</body>
+</html>
+
+/ kilder brukt for mappeelement 3:
+/https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+/https://developer.mozilla.org/en-US/docs/Web/JavaScript
+/https://www.w3schools.com/html/html5_canvas.asp
+/https://www.w3schools.com/js/
+/ meste av kode som er skrevet er førkunnskap som jeg har lært gjenom semestret. med både hjelp fra tidligere oppgaver gjort og github repositoriet til lærer
+/https://github.com/toremake/innfprog/tree/main

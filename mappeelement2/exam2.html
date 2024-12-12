@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eksamen, oppgave 2</title>
+    <link href="exam2.css" rel="stylesheet" media="all">
+</head>
+<body class="lato-regular">
+    <main>
+        <section id="contacts">
+            <h2>Kontakter</h2>
+            <div id="contactlist"></div>
+        </section>
+        <aside id="clock">13:37</aside>
+        <section id="books">
+            <h2>Regnskap</h2>
+            <p>Innkommende egenkapital: Kr. <span id="incomingequity"></span></p>
+            <section id="book">
+                <h3>Bokføring, november</h3>
+                <div id="bookhead" class="bookline">
+                    <span class="booktext">Kvittering</span>
+                    <span class="bookdate">Dato</span>
+                    <span class="bookamount">Sum</span>
+                </div>
+                <div id="booklines">
+                    <!-- Skal genereres fra datakilde i <script>. Oppføringen under er for å vise HTML-strukturen -->
+                </div>
+            </section>
+            <p>Balanse november: Kr. <span id="balance">-</span></p>
+            <p>Egenkapital: Kr. <span id="equity">-</span></p>
+        </section>
+        <section id="todoform">
+            <h2>Ny oppgave</h2>
+            <p><label for="task">Oppgavetekst:</label><br /><input type="text" id="task" /><button id="savetask">Lagre</button></p>
+        </section>
+        <section id="todos">
+            <h2>Oppgaver</h2>
+            <ul id="todolist">
+                <!-- De to listeelementene skal byttes ut med utskrift av data fra programkoden i <script> -->
+                <li>
+                    <span class="tast-text">Les eksamensteksten</span>
+                    <span class="task-status task-status-done">Done</span>
+                </li>
+                <li>
+                    <span class="tast-text">Løs oppgavene i InnfProg-eksamen</span>
+                    <span class="task-status task-status-todo">To do</span>
+                </li>
+            </ul>
+        </section>
+        <footer><p>Adminpanel IPv1.0</p></footer>
+    </main>
+
+    <script>
+        // CONTACTS
+        const contacts = [
+            {lastname: "Hansen", firstname: "Stine", office: "D2", mail: "s.hansen@company.com"},
+            {lastname: "Andersen", firstname: "Willy", office: "D1", mail: "w.andersen@company.com"},
+            {lastname: "Danilo", firstname: "Luciano", office: "E2", mail: "l.danilo@company.com"},
+            {lastname: "Wester", firstname: "Zato", office: "C3", mail: "z.wester@company.com"},
+            {lastname: "Jansson", firstname: "Sigried", office: "B1", mail: "s.jansson@company.com"}
+        ]
+
+        // Sorter kontaktene alfabetisk på etternavn
+        contacts.sort((a, b) => {
+            return a.lastname.localeCompare(b.lastname);
+        });
+
+        //kilde: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+
+        const contactList = document.getElementById('contactlist'); // Finn div-en hvor kontaktlisten skal vises
+
+        // Gå gjennom hver kontakt i arrayet
+        contacts.forEach(contact => {
+            // Legg til HTML-strukturen for hver kontakt:
+            //  Navn (etternavn og fornavn)
+            // Kontorplassering
+            // En klikkbar lenke til e-postadressen (mailto:)
+            contactList.innerHTML += `
+                <article>
+                    <p>
+                        <strong>${contact.lastname}, ${contact.firstname}</strong><br />
+                        Kontor: ${contact.office} | 
+                        E-post: <a href="mailto:${contact.mail}">${contact.mail}</a>
+                    </p>
+                </article>
+            `;
+        });
+
+        // **BOOKS**
+        const books = [
+            {text: "Printerblekk", date: "02.11.24", amount: -750},
+            {text: "Printerpapir", date: "02.11.24", amount: -439},
+            {text: "Nettbutikksalg, uke 44", date: "06.11.24", amount: 3428},
+            {text: "Produksjonsmateriale", date: "07.11.24", amount: -1299},
+            {text: "Kontorrekvisita", date: "10.11.24", amount: -644},
+            {text: "Nettbutikksalg, uke 45", date: "13.11.24", amount: 2988}
+        ];
+
+        let equity = 23782; // Penger på konto ved inngangen til november
+        document.getElementById("incomingequity").innerHTML = equity; // Viser inngående egenkapital
+
+        let balance = 0; // Startbalanse for utregning av utgifter og inntekter i november
+
+        const booklinesDiv = document.getElementById('booklines'); // Finn div-elementet for bokføringer
+
+        books.forEach(book => {
+            // Opprett HTML for hver bokføring
+            const bookHTML = `
+                <div class="bookline">
+                    <span class="booktext">${book.text}</span>
+                    <span class="bookdate">${book.date}</span>
+                    <span class="bookamount">${book.amount} kr</span>
+                </div>
+            `;
+            booklinesDiv.innerHTML += bookHTML; // Legg HTML-en til div-elementet
+        });
+
+        // kilde: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
+
+        // REFERANSER TIL HTML ELEMENTER FOR Å LEGGE TIL NY OPPGAVE
+        const taskInput = document.getElementById('task'); // Input-felt for oppgavetekst
+        const saveTaskButton = document.getElementById('savetask'); // Knapp for å lagre ny oppgave
+
+        // LAGRE NY OPPGAVE-FUNKSJONALITET
+        saveTaskButton.addEventListener('click', () => {
+            const taskText = taskInput.value.trim(); // Hent tekst fra input og fjern ekstra mellomrom
+            if (taskText === '') { // vis tekstfeltet er tomt
+                alert('Du må skrive inn tekst for å lagre en oppgave.'); // Feilmelding
+                return; // Avslutt funksjonen hvis feltet er tomt
+            }
+
+            // Opprett en ny oppgave og legg den til i todos-arrayet
+            const newTask = { text: taskText, status: 'To do' }; // Ny oppgave med status "To do"
+            todos.push(newTask); // Legg oppgaven til todos-arrayet
+
+            // Oppdater oppgavelisten på skjermen
+            const statusClass = 'task-status-todo'; // Statusklasse for oppgaven
+            todoList.innerHTML += `
+                <li>
+                    <span class="task-text">${newTask.text}</span>
+                    <span class="task-status ${statusClass}">${newTask.status}</span>
+                </li>
+            `;
+
+            // Tøm input-feltet for å gjøre det klart til neste oppgave
+            taskInput.value = '';
+        });
+
+        // **DIGITAL KLOKKE-FUNKSJON**
+        function updateClock() {
+            const now = new Date(); // Hent nåværende tid
+            const hours = now.getHours().toString().padStart(2, '0'); // Timer med to siffer
+            const minutes = now.getMinutes().toString().padStart(2, '0'); // Minutter med to siffer
+            const clockElement = document.getElementById('clock'); // Hent klokke-elementet
+            clockElement.textContent = `${hours}:${minutes}`; // Oppdater tekst
+            }
+            setInterval(updateClock, 1000); // Oppdater klokken hvert sekund
+            updateClock(); // Start umiddelbart
+            
+        // kilde for klokken: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+
+        // TODOS
+        const todos = [
+            {text: "Les eksamensteksten", status: "Done"},
+            {text: "Løs Innføring i programmerings-eksamen", status: "To do"},
+            {text: "Lag funksjonalitet for å registrere nye oppgaver", status: "To do"},
+            {text: "Lag funksjonalitet for å sette en eksisterende oppgave til utført ved å endre status", status: "To do"}
+        ];
+
+        const todoList = document.getElementById('todolist'); // Finn ul-elementet der oppgaver skal listes opp
+
+        // Gå gjennom hver oppgave i todos-arrayet
+        todos.forEach(todo => {
+            // Bestem CSS-klassen for status (rød for "To do", grønn for "Done")
+            const statusClass = todo.status === 'Done' ? 'task-status-done' : 'task-status-todo';
+
+            // Legg til HTML-strukturen for hver oppgave:
+            // - Tekst for oppgaven
+            // - Status med riktig farge (rød/grønn) basert på CSS-klassen
+            todoList.innerHTML += `
+                <li>
+                    <span class="task-text">${todo.text}</span>
+                    <span class="task-status ${statusClass}">${todo.status}</span>
+                </li>
+            `;
+        });
+        // kilde for todos delen: https://developer.mozilla.org/en-US/docs/Web/API/Window/setInterval og https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
+    </script>
+</body>
+</html>
